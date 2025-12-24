@@ -1,6 +1,16 @@
+# Assignment - 4: Dom Project
+
+### Name : Shahbaj Taher
+
+### Email: shahbajtahershezan@gmail.com
+
+### Live URL: https://shahbaj-reciepe.netlify.app/
+
+
+
 # 🍽️ Recipe Search Web Application
 
-TasteTopia is a modern and responsive recipe search web application that allows users to explore delicious recipes from around the world. It uses **TheMealDB API** to fetch real-time recipe data and presents it with a clean, user-friendly interface.
+This is a modern and responsive recipe search web application that allows users to explore delicious recipes from around the world. It uses **TheMealDB API** to fetch real-time recipe data and presents it with a clean, user-friendly interface.
 
 ---
 
