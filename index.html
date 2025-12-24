@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Your Favorite Recipe</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            transition: all 0.3s ease;
+        }
+        
+        /* Color Theme */
+        :root {
+            --primary: #3b82f6; /* Blue */
+            --secondary: #8b5cf6; /* Purple */
+            --accent: #10b981; /* Emerald */
+            --dark: #1f2937; /* Gray-800 */
+            --footer-bg: #111827; /* Gray-900 */
+        }
+        
+        .bg-primary { background-color: var(--primary); }
+        .bg-secondary { background-color: var(--secondary); }
+        .bg-accent { background-color: var(--accent); }
+        .bg-dark { background-color: var(--dark); }
+        .bg-footer { background-color: var(--footer-bg); }
+        
+        .text-primary { color: var(--primary); }
+        .text-secondary { color: var(--secondary); }
+        .text-accent { color: var(--accent); }
+        
+        .border-primary { border-color: var(--primary); }
+        .border-secondary { border-color: var(--secondary); }
+        
+        .hover\:bg-primary:hover { background-color: var(--primary); }
+        .hover\:bg-secondary:hover { background-color: var(--secondary); }
+        
+        /* Gradient */
+        .bg-gradient {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        
+        .bg-gradient-accent {
+            background: linear-gradient(135deg, var(--accent), #34d399);
+        }
+        
+        /* Smooth animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        /* Card hover effect */
+        .recipe-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .recipe-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Modal overlay */
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.85);
+        }
+        
+        /* Footer styling */
+        .footer {
+            background: linear-gradient(135deg, #111827, #1f2937);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans" style="font-family: 'Poppins', sans-serif;">
+    <!-- Header Section -->
+    <header class="relative h-[420px] md:h-[480px] flex items-center justify-center text-white">
+        <!-- Background Image -->
+        <img src="bg.jpg"
+             alt="Background"
+             class="absolute inset-0 w-full h-full object-cover">
+        
+        <!-- Dark Overlay -->
+        <div class="absolute inset-0 bg-black/60"></div>
+        
+        <!-- Content Container -->
+        <div class="relative z-10 w-full max-w-6xl mx-auto px-4">
+            <!-- Logo and Title -->
+            <div class="text-center mb-10">
+                <!-- Logo -->
+                <div class="flex justify-center mb-6">
+                    <div class="bg-white rounded-full p-3 shadow-lg">
+                        <img src="logo.png" alt="Logo" class="w-40 h-25">
+                    </div>
+                </div>
+                
+                <!-- Heading -->
+                <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
+                    Search Your <br class="hidden md:block">
+                    Favorite Recipe
+                </h1>
+                
+                <!-- Subtitle -->
+                <p class="text-base md:text-lg text-gray-200 max-w-2xl mx-auto mb-8">
+                    A handful of simple ingredients typify the fresh, vibrant flavors of Greek cooking.
+                </p>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="max-w-3xl mx-auto mb-6">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400 text-lg"></i>
+                    </div>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search..." 
+                        class="w-full pl-12 pr-4 py-4 rounded-xl bg-white/95 backdrop-blur-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary shadow-lg text-lg"
+                        autocomplete="off"
+                    >
+                    <button 
+                        id="searchButton" 
+                        class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
+                    >
+                        Search
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Popular Search Filters -->
+            <div class="flex flex-wrap justify-center gap-3">
+                <span class="text-gray-300 text-sm flex items-center">
+                    <i class="fas fa-fire-alt mr-2"></i>Popular:
+                </span>
+                <button class="popular-search bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-full text-sm backdrop-blur-sm">
+                    <i class="fas fa-hamburger mr-2"></i>Burger
+                </button>
+                <button class="popular-search bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-full text-sm backdrop-blur-sm">
+                    <i class="fas fa-pizza-slice mr-2"></i>Pizza
+                </button>
+                <button class="popular-search bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-full text-sm backdrop-blur-sm">
+                    <i class="fas fa-drumstick-bite mr-2"></i>Chicken
+                </button>
+                <button class="popular-search bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-full text-sm backdrop-blur-sm">
+                    <i class="fas fa-fish mr-2"></i>Seafood
+                </button>
+             
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Page Title -->
+        <div class="mb-8 text-center fade-in">
+            <h2 id="pageTitle" class="text-3xl font-bold text-gray-800 mb-2">Featured Recipes</h2>
+            <p class="text-gray-600">Discover amazing recipes from around the world</p>
+        </div>
+        
+        <!-- Recipe Cards Container -->
+        <div id="recipesContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Recipe cards will be loaded here -->
+        </div>
+        
+        <!-- No Results Message -->
+        <div id="noResults" class="hidden text-center py-12 fade-in">
+            <div class="mb-6">
+                <i class="fas fa-search text-6xl text-gray-300"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">No Recipes Found</h3>
+            <p class="text-gray-500 mb-6">Try searching for something else</p>
+            <button id="resetSearch" class="bg-primary hover:bg-blue-700 text-white py-2 px-6 rounded-lg">
+                Show All Recipes
+            </button>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="text-center py-8">
+            <div class="inline-block rounded-full h-12 w-12 border-4 border-primary border-t-transparent animate-spin mb-4"></div>
+            <p class="text-gray-600">Loading delicious recipes...</p>
+        </div>
+        
+        <!-- Load More Button -->
+        <div id="loadMoreContainer" class="text-center mt-8 hidden">
+            <button id="loadMoreBtn" class="bg-primary hover:bg-blue-700 text-white py-3 px-8 rounded-lg font-medium">
+                <i class="fas fa-plus mr-2"></i>Load More Recipes
+            </button>
+        </div>
+    </main>
+
+    <!-- Scroll to Top Button -->
+    <button 
+        id="scrollTopBtn" 
+        class="fixed bottom-6 right-6 bg-primary hover:bg-blue-700 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 opacity-0 pointer-events-none z-40"
+    >
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- Recipe Modal -->
+    <div id="recipeModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" id="modalOverlay"></div>
+        <div class="relative h-full flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden fade-in">
+                <!-- Modal Header -->
+                <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+                    <h2 id="modalTitle" class="text-xl font-bold text-gray-800 truncate"></h2>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <!-- Modal Content -->
+                <div class="overflow-y-auto p-6" style="max-height: calc(90vh - 120px)">
+                    <div class="flex flex-col lg:flex-row gap-6">
+                        <!-- Recipe Image and Basic Info -->
+                        <div class="lg:w-2/5">
+                            <div class="rounded-lg overflow-hidden mb-4">
+                                <img id="modalImage" src="" alt="" class="w-full h-64 object-cover">
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex items-center bg-blue-50 p-3 rounded-lg">
+                                    <i class="fas fa-tag text-primary mr-3"></i>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Category</p>
+                                        <p id="modalCategory" class="font-semibold"></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center bg-purple-50 p-3 rounded-lg">
+                                    <i class="fas fa-globe text-secondary mr-3"></i>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Cuisine</p>
+                                        <p id="modalArea" class="font-semibold"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recipe Details -->
+                        <div class="lg:w-3/5">
+                            <!-- Ingredients -->
+                            <div class="mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                                    <i class="fas fa-list text-primary mr-2"></i>
+                                    Ingredients
+                                </h3>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <ul id="modalIngredients" class="space-y-2">
+                                        <!-- Ingredients will be inserted here -->
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Instructions -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                                    <i class="fas fa-clipboard-list text-secondary mr-2"></i>
+                                    Instructions
+                                </h3>
+                                <div id="modalInstructions" class="bg-gray-50 p-4 rounded-lg text-gray-700 leading-relaxed">
+                                    <!-- Instructions will be inserted here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modal Footer -->
+                <div class="sticky bottom-0 bg-white border-t px-6 py-4 flex justify-end">
+                    <button id="closeModalBtn" class="bg-primary hover:bg-blue-700 text-white py-2 px-6 rounded-lg">
+                        Close Recipe
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer text-white pt-16 pb-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                <!-- Logo & Description -->
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <div class="w-12 h-12 rounded-full bg-gradient flex items-center justify-center">
+                            <span class="text-white font-bold text-2xl">T</span>
+                        </div>
+                        <span class="logo-font text-3xl font-bold">Cooking Reciepe</span>
+                    </div>
+                    <p class="text-gray-300 mb-8">
+                        An award-winning platform offering gourmet recipes with globally inspired cuisine made from the finest ingredients. Discover, cook, and share amazing dishes.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary flex items-center justify-center transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary flex items-center justify-center transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary flex items-center justify-center transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary flex items-center justify-center transition-colors">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6 text-primary">Quick Links</h3>
+                    <div class="footer-links space-y-3">
+                        <a href="#home" class="block text-gray-300 hover:text-white transition-colors hover:pl-2">
+                            <i class="fas fa-chevron-right mr-2 text-sm"></i>Home
+                        </a>
+                        <a href="#recipes" class="block text-gray-300 hover:text-white transition-colors hover:pl-2">
+                            <i class="fas fa-chevron-right mr-2 text-sm"></i>Recipes
+                        </a>
+                        <a href="#about" class="block text-gray-300 hover:text-white transition-colors hover:pl-2">
+                            <i class="fas fa-chevron-right mr-2 text-sm"></i>About Us
+                        </a>
+                        <a href="#" class="block text-gray-300 hover:text-white transition-colors hover:pl-2">
+                            <i class="fas fa-chevron-right mr-2 text-sm"></i>Categories
+                        </a>
+                        <a href="#" class="block text-gray-300 hover:text-white transition-colors hover:pl-2">
+                            <i class="fas fa-chevron-right mr-2 text-sm"></i>Popular Recipes
+                        </a>
+                        <a href="#contact" class="block text-gray-300 hover:text-white transition-colors hover:pl-2">
+                            <i class="fas fa-chevron-right mr-2 text-sm"></i>Contact
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Recipe Categories -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6 text-secondary">Recipe Categories</h3>
+                    <div class="space-y-3">
+                        <a href="#" class="block text-gray-300 hover:text-white transition-colors hover:pl-2">
+                            <i class="fas fa-utensils mr-2 text-accent"></i>Main Course
+                        </a>
+                        <a href="#" class="block text-gray-300 hover:text-white transition-colors hover:pl-2">
+                            <i class="fas fa-fish mr-2 text-accent"></i>Seafood Recipes
+                        </a>
+                        <a href="#" class="block text-gray-300 hover:text-white transition-colors hover:pl-2">
+                            <i class="fas fa-ice-cream mr-2 text-accent"></i>Desserts
+                        </a>
+                        <a href="#" class="block text-gray-300 hover:text-white transition-colors hover:pl-2">
+                            <i class="fas fa-leaf mr-2 text-accent"></i>Vegetarian
+                        </a>
+                        <a href="#" class="block text-gray-300 hover:text-white transition-colors hover:pl-2">
+                            <i class="fas fa-drumstick-bite mr-2 text-accent"></i>Chicken
+                        </a>
+                        <a href="#" class="block text-gray-300 hover:text-white transition-colors hover:pl-2">
+                            <i class="fas fa-pizza-slice mr-2 text-accent"></i>Italian
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Newsletter & Contact -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6 text-accent">Stay Updated</h3>
+                    <p class="text-gray-300 mb-4">Subscribe to get updates on new recipes and cooking tips.</p>
+                    <div class="flex mb-6">
+                        <input type="email" placeholder="Your email" class="flex-grow py-3 px-4 rounded-l-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <button class="bg-gradient px-6 rounded-r-lg font-medium hover:opacity-90">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-accent"></i>
+                            <span class="text-gray-300">recipes@thatix.com</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-accent"></i>
+                            <span class="text-gray-300">+1 (555) 123-4567</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mt-4">By subscribing, you agree to our Privacy Policy.</p>
+                </div>
+            </div>
+            
+            <!-- Copyright -->
+            <div class="border-t border-gray-700 mt-12 pt-8 text-center text-gray-400">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="mb-4 md:mb-0">&copy; 2023 TasteTopia Recipes. All rights reserved.</p>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Cookie Policy</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Sitemap</a>
+                    </div>
+                </div>
+                <p class="mt-4 text-sm">
+                    <i class="fas fa-heart text-red-500 mr-1"></i>
+                    Made with love for food lovers everywhere
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // API URLs
+        const API = {
+            SEARCH: 'https://www.themealdb.com/api/json/v1/1/search.php?s=',
+            LOOKUP: 'https://www.themealdb.com/api/json/v1/1/lookup.php?i='
+        };
+
+        // DOM Elements
+        const elements = {
+            recipesContainer: document.getElementById('recipesContainer'),
+            searchInput: document.getElementById('searchInput'),
+            searchButton: document.getElementById('searchButton'),
+            noResults: document.getElementById('noResults'),
+            loading: document.getElementById('loading'),
+            loadMoreBtn: document.getElementById('loadMoreBtn'),
+            loadMoreContainer: document.getElementById('loadMoreContainer'),
+            resetSearch: document.getElementById('resetSearch'),
+            pageTitle: document.getElementById('pageTitle'),
+            scrollTopBtn: document.getElementById('scrollTopBtn'),
+            recipeModal: document.getElementById('recipeModal'),
+            modalTitle: document.getElementById('modalTitle'),
+            modalImage: document.getElementById('modalImage'),
+            modalIngredients: document.getElementById('modalIngredients'),
+            modalInstructions: document.getElementById('modalInstructions'),
+            modalCategory: document.getElementById('modalCategory'),
+            modalArea: document.getElementById('modalArea'),
+            closeModal: document.getElementById('closeModal'),
+            closeModalBtn: document.getElementById('closeModalBtn'),
+            modalOverlay: document.getElementById('modalOverlay')
+        };
+
+        // State variables
+        let currentRecipes = [];
+        let currentSearchTerm = '';
+        let displayedCount = 0;
+        let isLoading = false;
+        const recipeCache = new Map();
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            loadInitialRecipes();
+            setupScrollToTop();
+        });
+
+        function setupEventListeners() {
+            // Search functionality
+            elements.searchButton.addEventListener('click', handleSearch);
+            elements.searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleSearch();
+            });
+
+            // Popular search buttons
+            document.querySelectorAll('.popular-search').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const searchText = btn.textContent.replace(/[^\w\s]/gi, '').trim();
+                    elements.searchInput.value = searchText;
+                    handleSearch();
+                });
+            });
+
+            // Reset search
+            elements.resetSearch?.addEventListener('click', () => {
+                elements.searchInput.value = '';
+                loadInitialRecipes();
+            });
+
+            // Load more recipes
+            elements.loadMoreBtn?.addEventListener('click', loadMoreRecipes);
+
+            // Modal events
+            elements.closeModal.addEventListener('click', closeRecipeModal);
+            elements.closeModalBtn.addEventListener('click', closeRecipeModal);
+            elements.modalOverlay.addEventListener('click', closeRecipeModal);
+
+            // Debounced search
+            let searchTimer;
+            elements.searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => {
+                    if (elements.searchInput.value.length >= 2) {
+                        handleSearch();
+                    }
+                }, 300);
+            });
+        }
+
+        function setupScrollToTop() {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    elements.scrollTopBtn.style.opacity = '1';
+                    elements.scrollTopBtn.style.pointerEvents = 'auto';
+                } else {
+                    elements.scrollTopBtn.style.opacity = '0';
+                    elements.scrollTopBtn.style.pointerEvents = 'none';
+                }
+            });
+
+            elements.scrollTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        async function loadInitialRecipes() {
+            showLoading();
+            currentSearchTerm = '';
+            elements.pageTitle.textContent = 'Featured Recipes';
+
+            try {
+                // Load popular recipes from different categories
+                const popularSearches = ['chicken', 'pasta', 'seafood', 'dessert', 'beef', 'cake'];
+                const promises = popularSearches.map(term => fetch(API.SEARCH + term));
+                const responses = await Promise.all(promises);
+                const data = await Promise.all(responses.map(r => r.json()));
+
+                // Combine and deduplicate recipes
+                const allRecipes = [];
+                const uniqueIds = new Set();
+                
+                data.forEach(response => {
+                    if (response.meals) {
+                        response.meals.forEach(recipe => {
+                            if (!uniqueIds.has(recipe.idMeal)) {
+                                uniqueIds.add(recipe.idMeal);
+                                allRecipes.push(recipe);
+                            }
+                        });
+                    }
+                });
+
+                // If we don't have enough recipes, fetch more
+                if (allRecipes.length < 8) {
+                    const extraResponse = await fetch(API.SEARCH + 'chicken');
+                    const extraData = await extraResponse.json();
+                    if (extraData.meals) {
+                        extraData.meals.forEach(recipe => {
+                            if (!uniqueIds.has(recipe.idMeal)) {
+                                uniqueIds.add(recipe.idMeal);
+                                allRecipes.push(recipe);
+                            }
+                        });
+                    }
+                }
+
+                currentRecipes = allRecipes;
+                displayRecipes(currentRecipes.slice(0, 8));
+                checkLoadMore();
+
+            } catch (error) {
+                console.error('Error loading recipes:', error);
+                showError('Failed to load recipes. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function handleSearch() {
+            const searchTerm = elements.searchInput.value.trim();
+            if (!searchTerm) {
+                loadInitialRecipes();
+                return;
+            }
+
+            showLoading();
+            currentSearchTerm = searchTerm;
+            elements.pageTitle.textContent = `Search Results for "${searchTerm}"`;
+
+            try {
+                const response = await fetch(API.SEARCH + searchTerm);
+                const data = await response.json();
+
+                if (data.meals) {
+                    currentRecipes = data.meals;
+                    displayRecipes(currentRecipes);
+                    hideNoResults();
+                } else {
+                    currentRecipes = [];
+                    elements.recipesContainer.innerHTML = '';
+                    showNoResults();
+                }
+                checkLoadMore();
+            } catch (error) {
+                console.error('Search error:', error);
+                showError('Failed to search recipes. Please check your connection.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayRecipes(recipes, append = false) {
+            if (!append) {
+                elements.recipesContainer.innerHTML = '';
+                displayedCount = 0;
+            }
+
+            if (recipes.length === 0) {
+                showNoResults();
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            const recipesToShow = append ? 
+                recipes.slice(displayedCount, displayedCount + 4) : 
+                recipes.slice(0, 8);
+
+            recipesToShow.forEach((recipe, index) => {
+                const card = createRecipeCard(recipe, displayedCount + index);
+                fragment.appendChild(card);
+            });
+
+            elements.recipesContainer.appendChild(fragment);
+            displayedCount += recipesToShow.length;
+
+            // Add fade-in effect
+            setTimeout(() => {
+                const cards = elements.recipesContainer.querySelectorAll('.recipe-card');
+                cards.forEach(card => {
+                    card.classList.add('fade-in');
+                });
+            }, 50);
+        }
+
+        function createRecipeCard(recipe, index) {
+            const card = document.createElement('div');
+            card.className = 'recipe-card bg-white rounded-lg overflow-hidden shadow-md';
+            card.style.animationDelay = `${index * 100}ms`;
+
+            // Cache recipe
+            recipeCache.set(recipe.idMeal, recipe);
+
+            // Determine icon based on category
+            let icon = 'fas fa-utensils';
+            const category = recipe.strCategory?.toLowerCase() || '';
+            if (category.includes('seafood') || category.includes('fish')) {
+                icon = 'fas fa-fish';
+            } else if (category.includes('dessert') || category.includes('cake')) {
+                icon = 'fas fa-ice-cream';
+            } else if (category.includes('chicken')) {
+                icon = 'fas fa-drumstick-bite';
+            } else if (category.includes('pizza')) {
+                icon = 'fas fa-pizza-slice';
+            } else if (category.includes('burger')) {
+                icon = 'fas fa-hamburger';
+            }
+
+            card.innerHTML = `
+                <div class="h-48 overflow-hidden">
+                    <img 
+                        src="${recipe.strMealThumb}" 
+                        alt="${recipe.strMeal}" 
+                        class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                    >
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-lg truncate">
+                            <i class="${icon} mr-2 text-primary"></i>${recipe.strMeal}
+                        </h3>
+                        <span class="bg-blue-100 text-primary text-xs px-2 py-1 rounded whitespace-nowrap">
+                            ${recipe.strCategory || 'Food'}
+                        </span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">
+                        <i class="fas fa-globe mr-1 text-secondary"></i>
+                        ${recipe.strArea || 'International'}
+                    </p>
+                    <button 
+                        class="view-recipe w-full bg-gradient hover:opacity-90 text-white py-2 rounded-md text-sm font-medium transition-all"
+                        data-id="${recipe.idMeal}"
+                    >
+                        <i class="fas fa-eye mr-2"></i>View Recipe
+                    </button>
+                </div>
+            `;
+
+            // Add click event
+            const viewBtn = card.querySelector('.view-recipe');
+            viewBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openRecipeModal(recipe.idMeal);
+            });
+
+            // Also make the entire card clickable
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('.view-recipe')) {
+                    openRecipeModal(recipe.idMeal);
+                }
+            });
+
+            return card;
+        }
+
+        function loadMoreRecipes() {
+            displayRecipes(currentRecipes, true);
+            checkLoadMore();
+        }
+
+        function checkLoadMore() {
+            if (displayedCount < currentRecipes.length) {
+                elements.loadMoreContainer.classList.remove('hidden');
+            } else {
+                elements.loadMoreContainer.classList.add('hidden');
+            }
+        }
+
+        async function openRecipeModal(recipeId) {
+            showLoading();
+            
+            // Check cache first
+            if (recipeCache.has(recipeId)) {
+                displayRecipeModal(recipeCache.get(recipeId));
+                hideLoading();
+                return;
+            }
+
+            try {
+                const response = await fetch(API.LOOKUP + recipeId);
+                const data = await response.json();
+
+                if (data.meals?.[0]) {
+                    const recipe = data.meals[0];
+                    recipeCache.set(recipeId, recipe);
+                    displayRecipeModal(recipe);
+                }
+            } catch (error) {
+                console.error('Error loading recipe details:', error);
+                showError('Failed to load recipe details');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayRecipeModal(recipe) {
+            // Set basic info
+            elements.modalTitle.textContent = recipe.strMeal;
+            elements.modalImage.src = recipe.strMealThumb;
+            elements.modalImage.alt = recipe.strMeal;
+            elements.modalCategory.textContent = recipe.strCategory || 'Not specified';
+            elements.modalArea.textContent = recipe.strArea || 'International';
+
+            // Clear previous content
+            elements.modalIngredients.innerHTML = '';
+
+            // Add ingredients
+            for (let i = 1; i <= 20; i++) {
+                const ingredient = recipe[`strIngredient${i}`];
+                const measure = recipe[`strMeasure${i}`];
+
+                if (ingredient?.trim()) {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center py-1';
+                    li.innerHTML = `
+                        <span class="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                        <span class="text-gray-700">${ingredient}</span>
+                        <span class="ml-auto text-gray-500 text-sm">${measure || ''}</span>
+                    `;
+                    elements.modalIngredients.appendChild(li);
+                }
+            }
+
+            // Format instructions
+            const instructions = recipe.strInstructions || 'No instructions available.';
+            const formattedInstructions = instructions
+                .split('\r\n')
+                .filter(step => step.trim())
+                .map((step, i) => `<p class="mb-3"><span class="font-bold text-primary">${i + 1}.</span> ${step}</p>`)
+                .join('');
+
+            elements.modalInstructions.innerHTML = formattedInstructions;
+
+            // Show modal
+            elements.recipeModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeRecipeModal() {
+            elements.recipeModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function showLoading() {
+            elements.loading.classList.remove('hidden');
+            isLoading = true;
+        }
+
+        function hideLoading() {
+            elements.loading.classList.add('hidden');
+            isLoading = false;
+        }
+
+        function showNoResults() {
+            elements.noResults.classList.remove('hidden');
+            elements.loadMoreContainer.classList.add('hidden');
+        }
+
+        function hideNoResults() {
+            elements.noResults.classList.add('hidden');
+        }
+
+        function showError(message) {
+            // Simple error notification
+            const errorEl = document.createElement('div');
+            errorEl.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-lg z-50 fade-in';
+            errorEl.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(errorEl);
+            setTimeout(() => errorEl.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
